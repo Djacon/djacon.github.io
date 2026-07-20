@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Daniel — ML Engineer — Projects" />
+  <title>Daniel · Projects</title>
+  <!--
+    ========================================================================
+    CSS Variables — recolor the site in ~30 seconds by editing this block.
+    ========================================================================
+    --bg:         page base               (#08080c)
+    --bg-alt:     surface bg              (#0d0d12)
+    --bg-glass:   glass card bg           (rgba(13,13,18,0.65))
+    --text:       body text               (#e5e5e5)
+    --text-dim:   secondary text          (#888899)
+    --text-mono:  mono/label text         (#9999aa)
+    --accent-1:   primary accent (emerald)   (#34d399)
+    --accent-2:   secondary accent (violet)(#a78bfa)
+    --accent-glow:accent radial glow      (#34d39908)
+    --border:     hairline border         (rgba(52,211,153,0.08))
+    --border-hover:border hover           (rgba(167,139,250,0.18))
+    --shadow:     card shadow             (0 0 0 1px rgba(52,211,153,0.06), 0 8px 32px rgba(0,0,0,0.5))
+    --shadow-hover:card hover shadow      (0 0 0 1px rgba(167,139,250,0.12), 0 16px 48px rgba(0,0,0,0.6), 0 0 24px rgba(52,211,153,0.06))
+    --content-w:  max content width       (720px)
+    --radius:     border-radius           (12px)
+    --font-sans:  sans-serif stack        ("Inter", system-ui, -apple-system, sans-serif)
+    --font-mono:  monospace stack         ("JetBrains Mono", ui-monospace, "Cascadia Code", monospace)
+    ========================================================================
+  -->
+  <style>
+    /* ---------- Variables ---------- */
+    :root {
+      --bg:          #08080c;
+      --bg-alt:      #0d0d12;
+      --bg-glass:    rgba(13,13,18,0.65);
+      --text:        #e5e5e5;
+      --text-dim:    #888899;
+      --text-mono:   #9999aa;
+      --accent-1:    #34d399;          /* emerald */
+      --accent-2:    #a78bfa;          /* soft violet */
+      --accent-glow: #34d39908;
+      --border:      rgba(52,211,153,0.08);
+      --border-hover:rgba(167,139,250,0.18);
+      --shadow:      0 0 0 1px rgba(52,211,153,0.06), 0 8px 32px rgba(0,0,0,0.5);
+      --shadow-hover:0 0 0 1px rgba(167,139,250,0.12), 0 16px 48px rgba(0,0,0,0.6), 0 0 24px rgba(52,211,153,0.06);
+      --content-w:   720px;
+      --radius:      12px;
+      --font-sans:   "Inter", system-ui, -apple-system, sans-serif;
+      --font-mono:   "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+      --nav-height:  56px;
+    }
+
+    /* ---------- Reset & Base ---------- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.7;
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---------- Canvas background ---------- */
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ---------- Scanline overlay ---------- */
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255,255,255,0.015) 2px,
+        rgba(255,255,255,0.015) 4px
+      );
+    }
+
+    /* ---------- Dark overlay over canvas for readability ---------- */
+    .page-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: rgba(8,8,12,0.35);
+    }
+
+    /* ---------- All content above canvas ---------- */
+    .nav, .container, .nav * { position: relative; z-index: 2; }
+
+    /* ---------- Typography ---------- */
+    h1, h2, h3, h4, p { max-width: var(--content-w); }
+
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    .gradient-text {
+      color: var(--accent-1);
+    }
+
+    .gradient-text-role {
+      color: var(--accent-1);
+    }
+
+    h2 {
+      font-size: clamp(1.15rem, 2.5vw, 1.4rem);
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      margin-bottom: 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    /* ---------- Terminal-style section prefix ---------- */
+    .section-prefix {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--accent-1);
+      opacity: 0.5;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+
+    h2 .section-prefix {
+      font-size: 0.75rem;
+    }
+
+    /* ---------- Mono helpers ---------- */
+    .mono, .role-label, .meta, .contact-link, .tag {
+      font-family: var(--font-mono);
+    }
+
+    /* ---------- Layout ---------- */
+    .container {
+      max-width: var(--content-w);
+      margin: 0 auto;
+      padding: 0 1.25rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    section {
+      margin-bottom: 5rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    section.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    section:first-of-type {
+      opacity: 1;
+      transform: none;
+    }
+
+    section:last-of-type {
+      margin-bottom: 3rem;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 0 0 4rem 0;
+    }
+
+    /* ---------- Navigation ---------- */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8,8,12,0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-inner {
+      max-width: var(--content-w);
+      margin: 0 auto;
+      padding: 0 1.25rem;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-name {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--accent-1);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-mono);
+      text-decoration: none;
+      transition: color 0.15s;
+      letter-spacing: 0.02em;
+      position: relative;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-1);
+    }
+
+    .nav-links a.active {
+      color: var(--accent-1);
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      position: relative;
+      padding-top: 4rem;
+      padding-bottom: 0.5rem;
+    }
+
+    /* Flat glow behind hero */
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: -4rem;
+      left: -6rem;
+      width: 120%;
+      height: 140%;
+      background: transparent;
+      pointer-events: none;
+      animation: hero-glow-pulse 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes hero-glow-pulse {
+      0% { opacity: 0.6; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.03); }
+    }
+
+
+    .hero-role {
+      font-size: 1rem;
+      margin-bottom: 1.25rem;
+      font-family: var(--font-mono);
+      font-weight: 500;
+    }
+
+    .hero-bio {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      margin-bottom: 1.75rem;
+      max-width: 600px;
+    }
+
+    .contact-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 1.75rem;
+      list-style: none;
+      padding: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .contact-links li {
+      max-width: none;
+    }
+
+    .contact-link {
+      color: var(--text-mono);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 0.2rem 0;
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .contact-link:hover {
+      color: var(--accent-1);
+    }
+
+    .contact-link:hover::after {
+      width: 100%;
+    }
+
+    /* ---------- Experience Timeline ---------- */
+    .timeline {
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.5rem;
+      bottom: 0.5rem;
+      width: 1px;
+      background: var(--accent-1);
+      opacity: 0.25;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 2.75rem;
+      transition: transform 0.2s ease;
+    }
+
+    .timeline-item:hover {
+      transform: translateX(3px);
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -1.5rem;
+      top: 0.55rem;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1.5px solid var(--accent-1);
+      transform: translateX(-4.5px);
+      transition: box-shadow 0.3s, border-color 0.3s;
+    }
+
+    .timeline-item:hover::before {
+      border-color: var(--accent-2);
+      box-shadow: 0 0 16px rgba(52,211,153,0.2), 0 0 32px rgba(167,139,250,0.1);
+    }
+
+    .timeline-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.25rem 1rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .timeline-company {
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .timeline-dates {
+      font-size: 0.78rem;
+      color: var(--text-mono);
+    }
+
+    .timeline-title {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      margin-bottom: 0.15rem;
+    }
+
+    .timeline-scope {
+      font-size: 0.83rem;
+      color: var(--accent-1);
+      margin-bottom: 0.6rem;
+      font-style: italic;
+      opacity: 0.85;
+    }
+
+    details {
+      font-size: 0.87rem;
+      color: var(--text-dim);
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--text-mono);
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      transition: color 0.15s;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    summary::before {
+      content: ">";
+      display: inline-block;
+      transition: transform 0.2s ease, color 0.2s ease;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-1);
+    }
+
+    details[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    summary:hover {
+      color: var(--accent-1);
+    }
+
+    details[open] summary {
+      color: var(--accent-1);
+      margin-bottom: 0.7rem;
+    }
+
+    /* ---------- Experience bullet list (Fix 1) ---------- */
+    .bullet-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .bullet-list li {
+      position: relative;
+      padding-left: 1.4em;
+      margin-bottom: 0.5em;
+      max-width: none;
+      line-height: 1.6;
+    }
+
+    .bullet-list li::before {
+      content: "\25B8";
+      position: absolute;
+      left: 0;
+      color: var(--accent-2);
+      opacity: 0.6;
+      font-size: 0.75rem;
+      line-height: 1.6;
+    }
+
+    /* ---------- Focus block (replaces Engineering Notes) ---------- */
+    .focus-block {
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.75rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .focus-block:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-3px);
+      border-color: var(--border-hover);
+    }
+
+    .focus-item {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      padding: 0.5rem 0;
+      position: relative;
+      padding-left: 1.4em;
+    }
+
+    .focus-item::before {
+      content: "\25B8";
+      position: absolute;
+      left: 0;
+      color: var(--accent-1);
+      opacity: 0.7;
+      font-size: 0.8rem;
+    }
+
+    .focus-item + .focus-item {
+      border-top: 1px solid var(--border);
+    }
+
+    /* ---------- Achievements ---------- */
+    .achievement-card {
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.5rem;
+      margin-bottom: 0.9rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .achievement-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+      border-color: var(--border-hover);
+    }
+
+    .achievement-title {
+      font-size: 0.88rem;
+      font-weight: 400;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+
+    .achievement-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .achievement-link {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent-1);
+      text-decoration: none;
+      padding: 0.2rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .achievement-link:hover {
+      color: var(--bg);
+      background: var(--accent-1);
+      border-color: var(--accent-1);
+    }
+
+    .project-desc {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-mono);
+      line-height: 1.5;
+    }
+
+    /* ---------- Footer / Contact ---------- */
+    .footer-section {
+      margin-top: auto;
+      padding: 2.5rem 0;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 1.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .resume-btn {
+      display: inline-flex;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #ffffff;
+      background: var(--accent-1);
+      padding: 0.4rem 1.1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      border: none;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      line-height: 1.5;
+      font-weight: 500;
+      box-shadow: 0 0 16px rgba(52,211,153,0.15);
+    }
+
+    .resume-btn:hover {
+      opacity: 0.92;
+      transform: translateY(-2px);
+      box-shadow: 0 0 24px rgba(52,211,153,0.25), 0 0 48px rgba(167,139,250,0.1);
+    }
+
+    .footer-note {
+      font-size: 0.75rem;
+      color: var(--text-mono);
+      opacity: 0.6;
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 640px) {
+      .nav-links { gap: 0.6rem; }
+      .nav-links a { font-size: 0.65rem; }
+      .hero { padding-top: 2.5rem; }
+      .hero { padding-top: 2.5rem; }
+      .container { padding: 0 1rem; }
+      section { margin-bottom: 2rem; }
+      .focus-block { padding: 1.25rem 1.25rem; }
+      .timeline-header { flex-direction: column; align-items: flex-start; }
+      .achievement-card { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    }
+
+    @media (max-width: 400px) {
+      body { font-size: 15px; }
+      .container { padding: 0 0.85rem; }
+      .contact-links { flex-direction: column; gap: 0.2rem; }
+      .footer-links { flex-direction: column; align-items: flex-start; }
+      .focus-block { padding: 1rem 1rem; }
+      .focus-item { font-size: 0.8rem; }
+      body::after { opacity: 0.5; }
+      .nav-links { gap: 0.4rem; }
+      .nav-links a { font-size: 0.6rem; }
+    }
+
+    /* ---------- Reduced Motion ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0s !important;
+        animation-duration: 0s !important;
+        animation-iteration-count: 1 !important;
+      }
+      section {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .focus-block:hover {
+        transform: none !important;
+      }
+      .achievement-card:hover {
+        transform: none !important;
+      }
+      .hero::before {
+        animation: none !important;
+      }
+      .gradient-text {
+        animation: none !important;
+        color: var(--accent-1) !important;
+        background: none !important;
+        -webkit-background-clip: unset !important;
+        -webkit-text-fill-color: unset !important;
+        background-clip: unset !important;
+      }
+      #bg-canvas { display: none !important; }
+    }
+  </style>
+  <!-- Google Fonts (optional external dep — safe to remove) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="assets/files/favicon.svg" rel="shortcut icon" type="image/x-icon" />
+</head>
+<body>
+
+  <!-- Canvas background: neural-network particle constellation -->
+  <canvas id="bg-canvas"></canvas>
+  <div class="page-overlay"></div>
+
+  <!-- ================================================================
+       STICKY NAV
+       ================================================================ -->
+  <nav class="nav" aria-label="Site navigation">
+    <div class="nav-inner">
+      <a href="/" rel="noopener" class="nav-name">Daniel</a>
+      <ul class="nav-links">
+        <li><a href="./">About</a></li>
+        <li><a href="./projects.html" class="active">Projects</a></li>
+        <li><a href="./assets/files/resume.pdf" target="_blank" rel="noopener">Resume</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ================================================================
+       HERO
+       ================================================================ -->
+  <div class="container">
+    <section class="hero" aria-label="Projects">
+      <h1><span class="gradient-text">Projects</span></h1>
+    </section>
+
+    <hr aria-hidden="true" />
+
+    <!-- ================================================================
+         PROJECTS
+         ================================================================ -->
+    <section id="projects" aria-label="Projects list">
+
+      <div class="achievement-card">
+        <div class="achievement-title">Banking RAG System</div>
+        <div class="achievement-links">
+          <span class="project-desc">Production RAG for banking-service search</span>
+        </div>
+      </div>
+
+      <p class="footer-note mono" style="text-align:center;margin-top:2rem;opacity:0.5">More coming</p>
+    </section>
+
+    <!-- ================================================================
+         CONTACT / FOOTER
+         ================================================================ -->
+    <footer id="contact" class="footer-section" aria-label="Contact">
+      <div class="footer-links">
+        <a class="contact-link" href="https://t.me/illedaniel" target="_blank" rel="noopener">Telegram</a>
+        <a class="contact-link" href="https://github.com/Djacon" target="_blank" rel="noopener">GitHub</a>
+        <a class="contact-link" href="https://www.linkedin.com/in/daniel-ille-ml-engineer" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="contact-link" href="mailto:danielille100@gmail.com">Email</a>
+      </div>
+      <p class="footer-note mono">
+        &copy; 2026 Daniel
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- ================================================================
+       SCROLL REVEAL — IntersectionObserver, ~15 lines vanilla JS.
+       Respects prefers-reduced-motion: skips entirely when set.
+       ================================================================ -->
+  <script>
+    (function() {
+      'use strict';
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var sections = document.querySelectorAll('section:not(.hero)');
+      if (!sections.length) return;
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      sections.forEach(function(s) { observer.observe(s); });
+    })();
+  </script>
+
+  <!-- ================================================================
+       CANVAS PARTICLE CONSTELLATION — vanilla JS.
+       Denser mesh (100 nodes desktop / 35 mobile), z-depth + parallax,
+       drifting gradient-glow blobs + cursor glow trail.
+       Pauses on tab hidden. Disabled under prefers-reduced-motion.
+       Mobile: fewer particles, lower opacity, no glow blobs.
+       Graceful: no-op on canvas failure -> clean static dark page.
+       ================================================================ -->
+  <script>
+    (function() {
+      'use strict';
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var c = document.getElementById('bg-canvas'), ctx, W, H, pts = [], blobs = [], mouse = { x:-9999, y:-9999 }, trail = [], aId;
+      if (!c || !(ctx = c.getContext('2d'))) return;
+      var mob = window.innerWidth < 640, n = mob ? 100 : 350, connD = mob ? 90 : 110, repR = mob ? 60 : 100, repF = mob ? 0.2 : 0.4;
+
+      function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
+
+      function init() {
+        pts = [];
+        for (var i = 0; i < n; i++) {
+          var z = Math.random();
+          pts.push({
+            x: Math.random()*W, y: Math.random()*H, z: z,
+            vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3,
+            r: 0.8 + z * 1.8,
+            hue: Math.random() < 0.5 ? 160 : 255,
+            op: 0.1 + z * 0.3
+          });
+        }
+        // Gradient-glow blobs (desktop only)
+        if (!mob) {
+          blobs = [];
+          for (var j = 0; j < 3; j++) {
+            blobs.push({
+              x: Math.random()*W, y: Math.random()*H,
+              vx: (Math.random()-0.5)*0.15, vy: (Math.random()-0.5)*0.15,
+              r: 120 + Math.random()*150,
+              hue: j < 2 ? 160 : 255,
+              op: 0.015 + Math.random()*0.015
+            });
+          }
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+
+        // 1) Flat glow blobs (behind everything)
+        for (var b = 0; b < blobs.length; b++) {
+          var bl = blobs[b];
+          ctx.beginPath();
+          ctx.arc(bl.x, bl.y, bl.r, 0, Math.PI*2);
+          ctx.fillStyle = 'hsla(' + bl.hue + ',70%,60%,' + (bl.op * 0.5) + ')';
+          ctx.fill();
+        }
+
+        // 2) Cursor glow trail
+        for (var t = 0; t < trail.length; t++) {
+          var tr = trail[t];
+          ctx.beginPath();
+          ctx.arc(tr.x, tr.y, tr.r, 0, Math.PI*2);
+          ctx.fillStyle = 'hsla(160,70%,65%,' + tr.op + ')';
+          ctx.fill();
+        }
+
+        // 3) Connections
+        for (var i = 0; i < pts.length; i++) {
+          for (var j = i + 1; j < pts.length; j++) {
+            var dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < connD) {
+              var alpha = (1 - dist/connD) * 0.1;
+              ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y);
+              ctx.strokeStyle = 'hsla(' + ((pts[i].hue+pts[j].hue)/2) + ',70%,60%,' + alpha + ')';
+              ctx.lineWidth = 0.5; ctx.stroke();
+            }
+          }
+        }
+
+        // 4) Particles
+        for (var k = 0; k < pts.length; k++) {
+          var p = pts[k];
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+          ctx.fillStyle = 'hsla(' + p.hue + ',70%,65%,' + p.op + ')';
+          ctx.fill();
+        }
+      }
+
+      function update() {
+        // Update blobs
+        for (var b = 0; b < blobs.length; b++) {
+          var bl = blobs[b];
+          bl.x += bl.vx; bl.y += bl.vy;
+          if (bl.x < -bl.r) bl.x = W + bl.r; if (bl.x > W + bl.r) bl.x = -bl.r;
+          if (bl.y < -bl.r) bl.y = H + bl.r; if (bl.y > H + bl.r) bl.y = -bl.r;
+        }
+
+        // Update trail
+        trail.unshift({ x: mouse.x, y: mouse.y, r: 6, op: 0.08 });
+        if (trail.length > 10) trail.pop();
+        for (var t = 0; t < trail.length; t++) {
+          trail[t].op *= 0.92;
+          trail[t].r *= 0.95;
+        }
+
+        // Update particles
+        for (var i = 0; i < pts.length; i++) {
+          var p = pts[i];
+          // Parallax: z-layer affects mouse drift
+          var pdx = (mouse.x - W/2) * 0.0004 * p.z;
+          var pdy = (mouse.y - H/2) * 0.0004 * p.z;
+          var dx = p.x - mouse.x + pdx, dy = p.y - mouse.y + pdy, dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < repR && dist > 0) { var f = (repR-dist)/repR*repF; p.vx += (dx/dist)*f*p.z; p.vy += (dy/dist)*f*p.z; }
+          p.vx *= 0.98; p.vy *= 0.98; p.x += p.vx; p.y += p.vy;
+          if (p.x < -40) p.x = W+40; if (p.x > W+40) p.x = -40;
+          if (p.y < -40) p.y = H+40; if (p.y > H+40) p.y = -40;
+        }
+      }
+
+      function loop() { update(); draw(); aId = requestAnimationFrame(loop); }
+
+      resize(); init(); loop();
+
+      window.addEventListener('resize', function() { resize(); init(); });
+      document.addEventListener('mousemove', function(e) { mouse.x = e.clientX; mouse.y = e.clientY; });
+      document.addEventListener('mouseleave', function() { mouse.x = -9999; mouse.y = -9999; trail = []; });
+      document.addEventListener('touchstart', function(e) { if(e.touches.length){mouse.x=e.touches[0].clientX;mouse.y=e.touches[0].clientY;} }, {passive:true});
+      document.addEventListener('touchmove', function(e) { if(e.touches.length){mouse.x=e.touches[0].clientX;mouse.y=e.touches[0].clientY;} }, {passive:true});
+      document.addEventListener('touchend', function() { mouse.x = -9999; mouse.y = -9999; });
+      document.addEventListener('visibilitychange', function() { if (document.hidden) { if (aId) { cancelAnimationFrame(aId); aId = null; } } else if (!aId) loop(); });
+      if (mob) c.style.opacity = '0.4';
+    })();
+  </script>
+
+</body>
+</html>
